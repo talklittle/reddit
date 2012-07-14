@@ -227,12 +227,13 @@ class Link(Thing, Printable):
 
         # hide NSFW links from non-logged users and under 18 logged users 
         # if they're not explicitly visiting an NSFW subreddit or a multireddit
-        if (((not c.user_is_loggedin and c.site != wrapped.subreddit)
-            or (c.user_is_loggedin and not c.over18))
-            and not (isinstance(c.site, MultiReddit) and c.over18)):
-            is_nsfw = bool(wrapped.over_18)
-            is_from_nsfw_sr = bool(wrapped.subreddit.over_18)
-
+        is_nsfw = bool(wrapped.over_18)
+        is_from_nsfw_sr = bool(wrapped.subreddit.over_18)
+        is_visiting_nsfw_sr = is_from_nsfw_sr and c.site == wrapped.subreddit
+        is_loggedout_visiting_under18_sr = not c.user_is_loggedin and not is_visiting_nsfw_sr
+        is_loggedin_under18 = c.user_is_loggedin and not c.over18
+        is_multireddit = isinstance(c.site, MultiReddit)
+        if ((is_loggedout_visiting_under18_sr or is_loggedin_under18) and not (is_multireddit and c.over18)):
             if is_nsfw or is_from_nsfw_sr:
                 return False
                 
